@@ -12,20 +12,13 @@
 
 using json = nlohmann::json;
 
-// ============================================================
-//  Client interaktif — menu CLI
-//  Semua komunikasi dengan server menggunakan format JSON.
-// ============================================================
-
 SOCKET g_sock = INVALID_SOCKET;
 
-// Kirim request JSON dan terima response — O(1) jaringan
 std::string sendRequest(const json& req) {
     std::string msg = req.dump() + Protocol::DELIMITER;
     if (send(g_sock, msg.c_str(), (int)msg.size(), 0) == SOCKET_ERROR)
         return "";
 
-    // Terima response sampai delimiter
     std::string buf;
     char c;
     while (true) {
@@ -37,7 +30,6 @@ std::string sendRequest(const json& req) {
     return buf;
 }
 
-// Tampilkan response dengan format rapi
 void printResponse(const std::string& raw) {
     if (raw.empty()) { std::cout << "[!] Tidak ada response dari server\n"; return; }
     try {
@@ -50,12 +42,11 @@ void printResponse(const std::string& raw) {
         else
             std::cout << "\n[ERR] " << msg << "\n";
 
-        // Tampilkan data jika ada
         if (resp.contains("data") && resp["data"].is_array()) {
             std::cout << std::string(60, '-') << "\n";
             for (auto& item : resp["data"]) {
                 if (item.contains("title")) {
-                    // Item perpustakaan
+                    
                     std::cout << std::setw(4) << item.value("id", 0)
                               << " | " << std::left << std::setw(8)
                               << item.value("type", "")
@@ -68,7 +59,7 @@ void printResponse(const std::string& raw) {
                                            ? "Tersedia " : "Dipinjam ")
                               << "\n";
                 } else if (item.contains("name")) {
-                    // Member
+                    
                     std::cout << std::setw(4) << item.value("id", 0)
                               << " | " << std::left << std::setw(25)
                               << item.value("name", "")
@@ -86,7 +77,6 @@ void printResponse(const std::string& raw) {
     }
 }
 
-// ---- Menu handlers ----------------------------------------
 
 void menuListItems() {
     json req = { {"action", "list_items"} };
@@ -172,9 +162,7 @@ void menuRemoveItem() {
     printResponse(sendRequest(req));
 }
 
-// ============================================================
-//  Main
-// ============================================================
+
 int main() {
     WSADATA wsa;
     WSAStartup(MAKEWORD(2, 2), &wsa);
@@ -195,7 +183,6 @@ int main() {
     }
     std::cout << "Terhubung!\n\n";
 
-    // Ping
     json ping = { {"action", "ping"} };
     printResponse(sendRequest(ping));
 
