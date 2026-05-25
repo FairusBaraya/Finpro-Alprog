@@ -1,16 +1,7 @@
 #pragma once
 #include "LibraryItem.h"
 
-// ============================================================
-//  PEWARISAN (Inheritance)
-//  Book mewarisi LibraryItem dan menambah atribut isbn & genre.
-//
-//  POLIMORFISME: override getInfo(), getType(), display()
-//  → dynamic binding saat dipanggil via pointer LibraryItem*
-//
-//  Big-O:
-//    getInfo(), getType(), display() : O(1)
-// ============================================================
+
 class Book : public LibraryItem {
 private:
     std::string isbn;
@@ -22,7 +13,6 @@ public:
         : LibraryItem(id, title, author, year),
           isbn(isbn), genre(genre) {}
 
-    // POLIMORFISME: override pure virtual
     std::string getType() const override { return "Buku"; }
 
     std::string getInfo() const override {
@@ -42,7 +32,6 @@ public:
                   << "\n";
     }
 
-    // Getter tambahan
     std::string getIsbn()  const { return isbn; }
     std::string getGenre() const { return genre; }
 };
