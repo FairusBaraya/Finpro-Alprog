@@ -2,21 +2,6 @@
 #include <iostream>
 #include <stdexcept>
 
-// ============================================================
-//  BONUS: Implementasi Linked List MANUAL (tanpa std::list/vector)
-//
-//  Template singly-linked list untuk menyimpan pointer ke
-//  LibraryItem (atau tipe apapun).
-//
-//  Big-O Analysis:
-//    pushBack()   : O(1)  — karena menyimpan pointer tail
-//    pushFront()  : O(1)
-//    removeById() : O(n)  — harus scan semua node
-//    find()       : O(n)  — linear scan
-//    getSize()    : O(1)  — disimpan sebagai field
-//    operator[]   : O(n)  — tidak ada random access di linked list
-//    toArray()    : O(n)  — copy semua elemen
-// ============================================================
 template <typename T>
 class LinkedList {
 private:
@@ -35,7 +20,6 @@ public:
 
     ~LinkedList() { clear(); }
 
-    // Tambah di belakang — O(1)
     void pushBack(T item) {
         Node* n = new Node(item);
         if (!tail) { head = tail = n; }
@@ -43,7 +27,6 @@ public:
         size++;
     }
 
-    // Tambah di depan — O(1)
     void pushFront(T item) {
         Node* n = new Node(item);
         n->next = head;
@@ -52,8 +35,6 @@ public:
         size++;
     }
 
-    // Hapus node berdasarkan kondisi lambda — O(n)
-    // Mengembalikan jumlah node yang dihapus
     template <typename Pred>
     int removeIf(Pred pred) {
         int removed = 0;
@@ -77,7 +58,6 @@ public:
         return removed;
     }
 
-    // Akses index ke-i — O(n)
     T& operator[](int index) {
         if (index < 0 || index >= size)
             throw std::out_of_range("LinkedList index out of range");
@@ -94,7 +74,6 @@ public:
         return cur->data;
     }
 
-    // Salin ke std::vector untuk keperluan sorting — O(n)
     std::vector<T> toVector() const {
         std::vector<T> result;
         Node* cur = head;
@@ -102,7 +81,6 @@ public:
         return result;
     }
 
-    // Rebuild list dari vector (dipakai setelah sort) — O(n)
     void fromVector(const std::vector<T>& vec) {
         clear();
         for (const T& item : vec) pushBack(item);
@@ -111,7 +89,6 @@ public:
     int  getSize() const { return size; }
     bool isEmpty() const { return size == 0; }
 
-    // Hapus semua node dan bebaskan memori — O(n)
     void clear() {
         Node* cur = head;
         while (cur) {
@@ -123,7 +100,6 @@ public:
         size = 0;
     }
 
-    // Iterator sederhana untuk range-for
     struct Iterator {
         Node* cur;
         Iterator(Node* n) : cur(n) {}
