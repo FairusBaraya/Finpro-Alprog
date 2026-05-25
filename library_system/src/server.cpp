@@ -8,30 +8,23 @@
 #include <string>
 #include <sstream>
 
-// Tambahkan path json/ ke include path saat kompilasi
 #include "../json/json.hpp"
 #include "../include/Library.h"
 #include "../include/Protocol.h"
 
 using json = nlohmann::json;
 
-// ============================================================
-//  Proses satu request JSON, kembalikan JSON response string.
-//  Big-O tergantung action — didokumentasikan per-case.
-// ============================================================
 std::string handleRequest(const std::string& raw, Library& lib) {
     json resp;
     try {
         json req = json::parse(raw);
         std::string action = req.value("action", "");
 
-        // ---- ping ----------------------------------------
         if (action == "ping") {
             resp["status"]  = "ok";
             resp["message"] = "pong";
         }
 
-        // ---- list_items — O(n log n) (sort by title) -----
         else if (action == "list_items") {
             auto items = lib.getAllItemsSorted();
             json arr = json::array();
@@ -51,7 +44,6 @@ std::string handleRequest(const std::string& raw, Library& lib) {
             resp["message"] = std::to_string(arr.size()) + " item ditemukan";
         }
 
-        // ---- search — O(n) linear search substring -------
         else if (action == "search") {
             std::string query = req["data"].value("query", "");
             if (query.empty()) {
@@ -76,7 +68,6 @@ std::string handleRequest(const std::string& raw, Library& lib) {
             }
         }
 
-        // ---- borrow — O(n) --------------------------------
         else if (action == "borrow") {
             int memberId = req["data"].value("member_id", -1);
             int itemId   = req["data"].value("item_id",   -1);
@@ -85,7 +76,6 @@ std::string handleRequest(const std::string& raw, Library& lib) {
             resp["message"] = result;
         }
 
-        // ---- return_item — O(n) ---------------------------
         else if (action == "return_item") {
             int memberId = req["data"].value("member_id", -1);
             int itemId   = req["data"].value("item_id",   -1);
@@ -94,7 +84,6 @@ std::string handleRequest(const std::string& raw, Library& lib) {
             resp["message"] = result;
         }
 
-        // ---- list_members — O(n) --------------------------
         else if (action == "list_members") {
             auto mems = lib.getAllMembers();
             json arr = json::array();
@@ -114,7 +103,6 @@ std::string handleRequest(const std::string& raw, Library& lib) {
             resp["message"] = std::to_string(arr.size()) + " member terdaftar";
         }
 
-        // ---- add_book — O(1) ------------------------------
         else if (action == "add_book") {
             auto& d = req["data"];
             int id = lib.addBook(
@@ -129,7 +117,6 @@ std::string handleRequest(const std::string& raw, Library& lib) {
             resp["data"]    = { {"id", id} };
         }
 
-        // ---- add_member — O(1) ----------------------------
         else if (action == "add_member") {
             auto& d = req["data"];
             int id = lib.addMember(
@@ -141,7 +128,6 @@ std::string handleRequest(const std::string& raw, Library& lib) {
             resp["data"]    = { {"id", id} };
         }
 
-        // ---- remove_item — O(n) ---------------------------
         else if (action == "remove_item") {
             int itemId = req["data"].value("item_id", -1);
             bool ok    = lib.removeItem(itemId);
@@ -165,9 +151,6 @@ std::string handleRequest(const std::string& raw, Library& lib) {
     return resp.dump() + Protocol::DELIMITER;
 }
 
-// ============================================================
-//  Terima data dari socket sampai menemukan delimiter '\n'
-// ============================================================
 std::string recvLine(SOCKET sock) {
     std::string buf;
     char c;
@@ -180,11 +163,7 @@ std::string recvLine(SOCKET sock) {
     return buf;
 }
 
-// ============================================================
-//  Main server — single-client (sesuai ketentuan Elektro)
-// ============================================================
 int main() {
-    // Init Winsock
     WSADATA wsa;
     if (WSAStartup(MAKEWORD(2, 2), &wsa) != 0) {
         std::cerr << "WSAStartup gagal\n";
@@ -198,7 +177,6 @@ int main() {
         return 1;
     }
 
-    // Izinkan reuse port
     int opt = 1;
     setsockopt(serverSock, SOL_SOCKET, SO_REUSEADDR,
                (char*)&opt, sizeof(opt));
@@ -223,7 +201,6 @@ int main() {
     std::cout << "Database siap: " << lib.getItemCount()
               << " item, " << lib.getMemberCount() << " member\n\n";
 
-    // Loop: terima satu client, layani sampai disconnect, ulangi
     while (true) {
         sockaddr_in clientAddr{};
         int addrLen = sizeof(clientAddr);
@@ -235,7 +212,6 @@ int main() {
         inet_ntop(AF_INET, &clientAddr.sin_addr, ipBuf, sizeof(ipBuf));
         std::cout << "[+] Client terhubung dari " << ipBuf << "\n";
 
-        // Layani client
         while (true) {
             std::string line = recvLine(clientSock);
             if (line.empty()) break;
