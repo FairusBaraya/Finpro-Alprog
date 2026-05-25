@@ -1,17 +1,7 @@
 #pragma once
 #include "LibraryItem.h"
 
-// ============================================================
-//  PEWARISAN (Inheritance) — child class kedua dari LibraryItem
-//  Magazine menambah atribut edition dan publisher.
-//
-//  POLIMORFISME: override getInfo(), getType(), display()
-//  Fungsi yang sama (display) menghasilkan output berbeda
-//  tergantung tipe objek sebenarnya → dynamic binding.
-//
-//  Big-O:
-//    getInfo(), getType(), display() : O(1)
-// ============================================================
+
 class Magazine : public LibraryItem {
 private:
     std::string publisher;
