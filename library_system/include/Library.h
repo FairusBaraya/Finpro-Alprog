@@ -9,37 +9,20 @@
 #include "LinkedList.h"
 #include "Algorithms.h"
 
-// ============================================================
-//  Library — mengelola koleksi item dan member
-//
-//  Menggunakan LinkedList<LibraryItem*> manual untuk koleksi
-//  dan LinkedList<Member*> untuk member.
-//
-//  Big-O ringkasan:
-//    addItem()          : O(1)
-//    addMember()        : O(1)
-//    findItemById()     : O(n)
-//    findMemberById()   : O(n)
-//    searchItems()      : O(n log n) sort + O(log n) binary search
-//    borrowItem()       : O(n)
-//    returnItem()       : O(n)
-//    listAll()          : O(n)
-// ============================================================
+
 class Library {
 private:
-    LinkedList<LibraryItem*> items;    // BONUS: manual linked list
+    LinkedList<LibraryItem*> items;    
     LinkedList<Member*>      members;
     int nextItemId;
     int nextMemberId;
 
-    // Cari item berdasarkan ID — O(n)
     LibraryItem* findItemById(int id) const {
         for (LibraryItem* item : items)
             if (item->getId() == id) return item;
         return nullptr;
     }
 
-    // Cari member berdasarkan ID — O(n)
     Member* findMemberById(int id) const {
         for (Member* m : members)
             if (m->getMemberId() == id) return m;
@@ -48,7 +31,6 @@ private:
 
 public:
     Library() : nextItemId(1), nextMemberId(1) {
-        // Seed data awal
         addBook("Laskar Pelangi", "Andrea Hirata", 2005,
                 "978-979-1260-00-1", "Fiksi");
         addBook("Bumi Manusia", "Pramoedya Ananta Toer", 1980,
@@ -63,9 +45,9 @@ public:
                     "National Geographic Society", 201);
         addMagazine("Popular Science", "Various", 2023,
                     "Bonnier Corp", 180);
-        addMember("Alice Wijaya",  "alice@email.com");
-        addMember("Budi Santoso",  "budi@email.com");
-        addMember("Citra Dewi",    "citra@email.com");
+        addMember("Fairus Baraya",  "faibaraya@email.com");
+        addMember("jidan",  "bangkur@email.com");
+        addMember("senna",  "sen@email.com");
     }
 
     ~Library() {
@@ -73,7 +55,6 @@ public:
         for (Member* m : members)       delete m;
     }
 
-    // ---- CRUD Item ----------------------------------------
 
     int addBook(const std::string& title, const std::string& author,
                 int year, const std::string& isbn,
@@ -94,13 +75,12 @@ public:
     bool removeItem(int id) {
         LibraryItem* target = findItemById(id);
         if (!target) return false;
-        if (!target->getAvailable()) return false; // sedang dipinjam
+        if (!target->getAvailable()) return false;
         items.removeIf([id](LibraryItem* it){ return it->getId() == id; });
         delete target;
         return true;
     }
 
-    // ---- CRUD Member --------------------------------------
 
     int addMember(const std::string& name, const std::string& email) {
         int id = nextMemberId++;
@@ -108,9 +88,7 @@ public:
         return id;
     }
 
-    // ---- Transaksi ----------------------------------------
 
-    // Pinjam buku — O(n)
     std::string borrowItem(int memberId, int itemId) {
         Member*      m = findMemberById(memberId);
         LibraryItem* it = findItemById(itemId);
@@ -124,7 +102,6 @@ public:
                it->getTitle() + "\"";
     }
 
-    // Kembalikan buku — O(n)
     std::string returnItem(int memberId, int itemId) {
         Member*      m  = findMemberById(memberId);
         LibraryItem* it = findItemById(itemId);
@@ -136,40 +113,33 @@ public:
         return "OK: \"" + it->getTitle() + "\" berhasil dikembalikan";
     }
 
-    // ---- Pencarian ----------------------------------------
 
-    // Cari berdasarkan judul (substring, linear search) — O(n)
     std::vector<LibraryItem*> searchByTitle(const std::string& query) const {
         auto vec = items.toVector();
         return Algorithms::linearSearchByTitle(vec, query);
     }
 
-    // Cari persis + terurut (binary search, setelah quick sort) — O(n log n)
     LibraryItem* searchExact(const std::string& title) const {
         auto vec = items.toVector();
-        Algorithms::sortByTitle(vec);   // O(n log n)
-        int idx = Algorithms::binarySearch(vec, title);  // O(log n)
+        Algorithms::sortByTitle(vec);   
+        int idx = Algorithms::binarySearch(vec, title);  
         return (idx >= 0) ? vec[idx] : nullptr;
     }
 
-    // Ambil semua item sebagai vector (untuk dikirim via JSON) — O(n)
     std::vector<LibraryItem*> getAllItems() const {
         return items.toVector();
     }
 
-    // Ambil semua item terurut — O(n log n)
     std::vector<LibraryItem*> getAllItemsSorted() const {
         auto vec = items.toVector();
         Algorithms::sortByTitle(vec);
         return vec;
     }
 
-    // Ambil semua member — O(n)
     std::vector<Member*> getAllMembers() const {
         return members.toVector();
     }
 
-    // Info member — O(n)
     Member* getMemberById(int id) const { return findMemberById(id); }
     LibraryItem* getItemById(int id)    const { return findItemById(id); }
 
