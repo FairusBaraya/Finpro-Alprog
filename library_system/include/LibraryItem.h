@@ -2,18 +2,9 @@
 #include <string>
 #include <iostream>
 
-// ============================================================
-//  ABSTRAKSI (Abstract Class)
-//  LibraryItem adalah abstract class — tidak bisa diinstansiasi
-//  langsung. Setiap item perpustakaan HARUS mengimplementasikan
-//  method virtual murni getInfo() dan getType().
-//
-//  Big-O:
-//    getInfo(), getType() : O(1)  — hanya return string
-// ============================================================
+
 class LibraryItem {
 protected:
-    // ENKAPSULASI: atribut disembunyikan di protected/private
     int         id;
     std::string title;
     std::string author;
@@ -28,11 +19,9 @@ public:
 
     virtual ~LibraryItem() = default;
 
-    // --- Pure virtual (wajib di-override oleh child class) ---
-    virtual std::string getInfo() const = 0;   // ABSTRAKSI
-    virtual std::string getType() const = 0;   // ABSTRAKSI
+    virtual std::string getInfo() const = 0;   
+    virtual std::string getType() const = 0;   
 
-    // --- POLIMORFISME: virtual method dengan default behaviour ---
     virtual void display() const {
         std::cout << "[" << getType() << "] "
                   << "ID:" << id << " | " << title
@@ -41,7 +30,6 @@ public:
                   << "\n";
     }
 
-    // --- ENKAPSULASI: getter/setter ---
     int         getId()        const { return id; }
     std::string getTitle()     const { return title; }
     std::string getAuthor()    const { return author; }
